@@ -2,7 +2,6 @@ import React from 'react';
 import unsplash from '../api/unsplash';
 import SearchBar from './SearchBar';
 import ImageList from './ImageList';
-import SearchTab from './SearchTab';
 import SearchTabs from './SearchTabs';
 
 
@@ -15,7 +14,8 @@ class App extends React.Component {
 
     state = {
         images: [],
-        pageNumber: 1
+        pageNumber: 1,
+        activeTab: ''
     };
     
     onSearchSubmit = async term => {
@@ -31,31 +31,8 @@ class App extends React.Component {
         });
 
         this.setState({ images: response.data.results, pageNumber: 1 });
-
-        this.createNewTab()
+        this.setState({activeTab: this.term[this.term.length - 1]})
     };
-
-    // createNewTab = () => {
-    //     const resetActiveItems = () => {
-    //         const activeItems = document.getElementsByClassName('ui top')
-    //         for (let i = 0 ; i < activeItems[0].childElementCount ; i++) {
-    //             activeItems[0].childNodes[i].classList.remove('active');
-    //         };
-    //     };
-
-    //     const activeItems = document.getElementsByClassName('ui top')
-    //     var tab = document.createElement('div');
-    //     tab.setAttribute('class', 'active item');
-    //     tab.addEventListener('click', e => {
-    //         resetActiveItems();
-    //         e.target.classList.add('active');
-    //     });
-
-    //     tab.innerHTML = `${this.term[this.term.length - 1]}`
-    //     resetActiveItems();
-    //     tab.classList.add('active');
-    //     activeItems[0].appendChild(tab);
-    // }
 
     onLastImageFound = lastImage => {
         const observer = new IntersectionObserver(entries => {
@@ -90,15 +67,22 @@ class App extends React.Component {
         observer.observe(lastImage);
     };
     
+
+    setActiveTab = (e) => {
+        this.setState({ activeTab: e.target.innerHTML });
+    }
+    
     render() {
         return (
             <div className="ui container" style={{ marginTop: '10px'}}>
                 <SearchBar onSubmit={this.onSearchSubmit} />
-                <SearchTabs searches={['a', 'b']} active="a"></SearchTabs>
-                {/* <SearchTab 
-                    term={this.term}
+                <SearchTabs 
+                    searches={this.term} 
+                    activeTab={this.state.activeTab} 
+                    setActiveTab={this.setActiveTab} 
                     imageList={<ImageList onLastImageFound={this.onLastImageFound} images={this.state.images}/>}
-                /> */}
+                    />
+                
                 
             </div>
         );
