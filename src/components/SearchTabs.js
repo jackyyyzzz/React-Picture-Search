@@ -4,7 +4,7 @@ const SearchTabs = (props) => {
     
     return (
         <>
-            <div className="ui top attached tabular menu">
+            <div className="ui top attached tabular menu" >
                 {props.searches.map(search => {
                     return (
                         <div 
@@ -21,7 +21,7 @@ const SearchTabs = (props) => {
                 
             </div>
 
-            <div className="ui bottom attached active tab segment">
+            <div className="ui bottom attached active tab segment" >
                 {props.imageList}
             </div>
         </>

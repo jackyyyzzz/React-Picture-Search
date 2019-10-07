@@ -8,52 +8,63 @@ import SearchTabs from './SearchTabs';
 class App extends React.Component {
     constructor() {
         super()
-        this.term = []
+        this.terms = []
         this.loading = false
     }
 
     state = {
-        images: [],
-        pageNumber: 1,
-        activeTab: ''
+        activeTab: '',
+
+        '': {
+            images: [],
+            pageNumber: 1
+            }
+        
     };
     
-    onSearchSubmit = async term => {
-        if (this.term.includes(term)) {
+    onSearchSubmit = async searchTerm => {
+        if (this.terms.includes(searchTerm)) {
             return
         }
-        this.term.push(term);
+
+
+        this.terms.push(searchTerm);
         const response = await unsplash.get('/search/photos', {
             params: { 
-                query: this.term[this.term.length - 1],
+                query: this.terms[this.terms.length - 1],
                 page: 1
             },
         });
 
-        this.setState({ images: response.data.results, pageNumber: 1 });
-        this.setState({activeTab: this.term[this.term.length - 1]})
+        this.state[`${searchTerm}`] = { images: response.data.results, pageNumber: 1 };
+        this.setState({activeTab: this.terms[this.terms.length - 1]})
+
+        
     };
 
     onLastImageFound = lastImage => {
+        let { activeTab } = this.state
         const observer = new IntersectionObserver(entries => {
             if (this.loading) return
             if (entries[0].isIntersecting) {
                 this.loading = true
                 unsplash.get('/search/photos', {
                     params: {
-                        query: this.term[this.term.length - 1],
-                        page: this.state.pageNumber + 1
+                        query: activeTab,
+                        page: this.state[`${activeTab}`].pageNumber + 1
                     }
                 }).then(response => {
-                    const origImages = [...this.state.images, ...response.data.results];
+                    const origImages = [...this.state[`${activeTab}`].images, ...response.data.results];
                     const images = origImages
                         .filter(image => origImages
                             .find(origImage => origImage.id === image.id && image !== origImage
                             ) === undefined
                     )
-                    this.setState({
-                        images: images,
-                        pageNumber: this.state.pageNumber + 1 
+                    this.setState({ 
+                        [`${activeTab}`] : {
+                                images: images,
+                                pageNumber: this.state[`${activeTab}`].pageNumber + 1 
+                            }
                     });
                     this.loading = false
                     observer.disconnect()
@@ -76,11 +87,15 @@ class App extends React.Component {
         return (
             <div className="ui container" style={{ marginTop: '10px'}}>
                 <SearchBar onSubmit={this.onSearchSubmit} />
-                <SearchTabs 
-                    searches={this.term} 
+                <SearchTabs
+                    searches={this.terms} 
                     activeTab={this.state.activeTab} 
                     setActiveTab={this.setActiveTab} 
-                    imageList={<ImageList onLastImageFound={this.onLastImageFound} images={this.state.images}/>}
+                    imageList={<ImageList 
+                                    onLastImageFound={this.onLastImageFound} 
+                                    images={this.state[`${this.state.activeTab}`].images}
+
+                                    />}
                     />
                 
                 
