@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 const SearchTabs = (props) => {
-    
+    if (props.searches && props.searches.length === 0) return null;
+
     return (
         <>
             <div className="ui top attached tabular menu" >
@@ -10,11 +11,13 @@ const SearchTabs = (props) => {
                         <div 
                             className={'item' + (search === props.activeTab ? ' active' : '')} 
                             key={search} 
-                            onClick={props.setActiveTab}
+                            onClick={search !== props.activeTab ? props.setActiveTab : null}
                             style={{ cursor: 'pointer' }}
+                            data-search-term={search}
                             >
                             
                             {search}
+                            <button onClick={props.closeTab} data-button-type="close">x</button>
                         </div>
                     )}
                 )}

@@ -80,10 +80,21 @@ class App extends React.Component {
     
 
     setActiveTab = (e) => {
-        this.setState({ activeTab: e.target.innerHTML });
+        if (e.target.getAttribute('data-button-type') === 'close') return
+        this.setState({ activeTab: e.target.getAttribute('data-search-term')});
+    }
+
+    closeTab = (e) => {
+        const tabToClose = e.target.parentNode.getAttribute('data-search-term');
+
+        this.setState({ [`${tabToClose}`]: undefined });
+        this.terms = this.terms.filter(term => term !== tabToClose)
+
+        this.setState({ activeTab: this.terms[0] || '' });
     }
     
     render() {
+        console.log(this.state)
         return (
             <div className="ui container" style={{ marginTop: '10px'}}>
                 <SearchBar onSubmit={this.onSearchSubmit} />
@@ -91,6 +102,7 @@ class App extends React.Component {
                     searches={this.terms} 
                     activeTab={this.state.activeTab} 
                     setActiveTab={this.setActiveTab} 
+                    closeTab={this.closeTab}
                     imageList={<ImageList 
                                     onLastImageFound={this.onLastImageFound} 
                                     images={this.state[`${this.state.activeTab}`].images}
