@@ -15,9 +15,11 @@ class App extends React.Component {
     state = {
         activeTab: '',
 
-        '': {
-            images: [],
-            pageNumber: 1
+        searchResults: {
+                        '': {
+                            images: [],
+                            pageNumber: 1
+                        }
             }
         
     };
@@ -44,14 +46,14 @@ class App extends React.Component {
         }
 
 
-        this.state[`${searchTerm}`] = { images: response.data.results, pageNumber: 1 };
+        this.state.searchResults[`${searchTerm}`] = { images: response.data.results, pageNumber: 1 };
         this.setState({activeTab: this.terms[this.terms.length - 1]})
 
         
     };
 
     onLastImageFound = lastImage => {
-        let { activeTab } = this.state
+        let { activeTab, searchResults } = this.state
         const observer = new IntersectionObserver(entries => {
             if (this.loading) return
             if (entries[0].isIntersecting) {
@@ -59,21 +61,21 @@ class App extends React.Component {
                 unsplash.get('/search/photos', {
                     params: {
                         query: activeTab,
-                        page: this.state[`${activeTab}`].pageNumber + 1
+                        page: searchResults[`${activeTab}`].pageNumber + 1
                     }
                 }).then(response => {
-                    const origImages = [...this.state[`${activeTab}`].images, ...response.data.results];
+                    const origImages = [...searchResults[`${activeTab}`].images, ...response.data.results];
                     const images = origImages
                         .filter(image => origImages
                             .find(origImage => origImage.id === image.id && image !== origImage
                             ) === undefined
                     )
-                    this.setState({ 
-                        [`${activeTab}`] : {
-                                images: images,
-                                pageNumber: this.state[`${activeTab}`].pageNumber + 1 
-                            }
-                    });
+                    const newResults = Object.assign({}, searchResults)
+                    newResults[`${activeTab}`].images = images
+                    newResults[`${activeTab}`].pageNumber += 1
+
+                    this.setState({ searchResults: newResults });
+
                     this.loading = false
                     observer.disconnect()
                 }).catch(e => {
@@ -95,7 +97,10 @@ class App extends React.Component {
     closeTab = (e) => {
         const tabToClose = e.target.parentNode.getAttribute('data-search-term');
 
-        this.setState({ [`${tabToClose}`]: undefined });
+        const newResults = Object.assign({}, this.state.searchResults)
+        delete newResults[`${tabToClose}`]
+        this.setState({ searchResults: newResults });
+
         this.terms = this.terms.filter(term => term !== tabToClose)
 
         this.setState({ activeTab: this.terms[0] || '' });
@@ -113,7 +118,7 @@ class App extends React.Component {
                     closeTab={this.closeTab}
                     imageList={<ImageList 
                                     onLastImageFound={this.onLastImageFound} 
-                                    images={this.state[`${this.state.activeTab}`].images}
+                                    images={this.state.searchResults[`${this.state.activeTab}`].images}
 
                                     />}
                     />
