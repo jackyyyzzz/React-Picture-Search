@@ -23,9 +23,10 @@ class App extends React.Component {
     };
     
     onSearchSubmit = async searchTerm => {
+        searchTerm = searchTerm.toLowerCase();
         if (this.terms.includes(searchTerm)) {
             return
-        }
+        } 
 
 
         this.terms.push(searchTerm);
@@ -35,6 +36,13 @@ class App extends React.Component {
                 page: 1
             },
         });
+
+        if (response.data.results.length === 0) {
+            this.terms = this.terms.filter(term => term !== searchTerm)
+            alert(`Sorry, no results found for ${searchTerm}`)
+            return
+        }
+
 
         this.state[`${searchTerm}`] = { images: response.data.results, pageNumber: 1 };
         this.setState({activeTab: this.terms[this.terms.length - 1]})
