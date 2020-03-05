@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './SearchTabs.css';
 
 const SearchTabs = (props) => {
     if (props.searches && props.searches.length === 0) return null;
@@ -12,7 +13,6 @@ const SearchTabs = (props) => {
                             className={'item' + (search === props.activeTab ? ' active' : '')} 
                             key={search} 
                             onClick={search !== props.activeTab ? props.setActiveTab : null}
-                            style={{ cursor: 'pointer' }}
                             data-search-term={search}
                             >
                             
